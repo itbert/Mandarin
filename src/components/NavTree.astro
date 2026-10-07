@@ -1,0 +1,17 @@
+---
+import type { NavigationNode } from '../lib/navigation';
+interface Props { nodes: NavigationNode[]; }
+const { nodes } = Astro.props;
+const pathname = Astro.url.pathname;
+function includesCurrent(node: NavigationNode): boolean {
+  return node.href === pathname || node.children.some(includesCurrent);
+}
+---
+<ul class="nav-tree">
+  {nodes.map((node) => <li>
+    {node.href ? <a href={node.href} aria-current={node.href === pathname ? 'page' : undefined}>{node.label}</a> : <details open={includesCurrent(node)}>
+      <summary>{node.label}<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.5" /></svg></summary>
+      <Astro.self nodes={node.children} />
+    </details>}
+  </li>)}
+</ul>

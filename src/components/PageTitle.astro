@@ -1,0 +1,15 @@
+---
+import { currentSection, withBase } from '../config/sections';
+const { entry } = Astro.locals.starlightRoute;
+const isHome = Astro.url.pathname === withBase('/');
+const section = currentSection(Astro.url.pathname);
+const isOverview = section && Astro.url.pathname === withBase(section.path);
+---
+{!isHome && <div class="page-intro">
+  <nav class="breadcrumbs" aria-label="Хлебные крошки" data-pagefind-ignore>
+    <a href={withBase('/')} aria-label="Главная"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 11 9-8 9 8M6 9v12h12V9M10 21v-7h4v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></a>
+    {section && !isOverview && <><span aria-hidden="true">/</span><a href={withBase(section.path)}>{section.title}</a></>}
+    <span aria-hidden="true">/</span><span aria-current="page">{entry.data.title}</span>
+  </nav>
+  <h1 id="_top" data-pagefind-meta="title">{entry.data.title}</h1>
+</div>}

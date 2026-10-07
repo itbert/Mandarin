@@ -1,0 +1,13 @@
+---
+import { withBase, repository } from '../config/sections';
+---
+<footer class="site-footer" data-pagefind-ignore>
+  <div class="footer-inner">
+    <a class="footer-brand" href={withBase('/')}>Mandarin</a>
+    <nav aria-label="Ссылки проекта">
+      <a href={withBase('/about/')}>О проекте</a>
+      <a href={withBase('/license/')}>Лицензия</a>
+      <a href={repository}>GitHub</a>
+    </nav>
+  </div>
+</footer>

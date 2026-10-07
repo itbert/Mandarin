@@ -1,0 +1,9 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { withBase } from '../config/sections';
+---
+<StarlightPage frontmatter={{ title: 'Страница не найдена', description: 'Запрошенной страницы нет в библиотеке Mandarin. Вернитесь на главную или воспользуйтесь поиском.', template: 'splash', tableOfContents: false, pagefind: false, head: [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, follow' } }, { tag: 'link', attrs: { rel: 'canonical', href: 'https://itbert.github.io/Mandarin/404.html' } }, { tag: 'meta', attrs: { property: 'og:url', content: 'https://itbert.github.io/Mandarin/404.html' } }] }}>
+  <p class="error-code" aria-hidden="true">404</p>
+  <p>Возможно, адрес изменился или в нём опечатка. Вернитесь на главную или найдите нужный раздел через поиск в шапке.</p>
+  <p><a class="primary-link" href={withBase('/')}>На главную</a></p>
+</StarlightPage>

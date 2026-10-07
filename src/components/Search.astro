@@ -1,0 +1,123 @@
+---
+import { withBase } from '../config/sections';
+---
+<button class="search-trigger js-only" type="button" aria-label="Поиск по сайту" aria-haspopup="dialog" aria-controls="search-dialog">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7" /><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" /></svg>
+  <span class="search-label">Поиск</span><kbd aria-hidden="true">⌘ K</kbd>
+</button>
+<dialog id="search-dialog" class="search-dialog" aria-labelledby="search-dialog-title" data-index-url={withBase('/pagefind/pagefind.js')}>
+  <div class="dialog-heading"><h2 id="search-dialog-title">Поиск по Mandarin</h2><button type="button" class="icon-button" data-close-search aria-label="Закрыть поиск">✕</button></div>
+  <label class="search-input-label" for="search-input">Название направления или слово</label>
+  <input id="search-input" type="search" placeholder="Что вы ищете?" autocomplete="off" spellcheck="false" autofocus />
+  <p id="search-status" role="status" aria-live="polite">Введите запрос, чтобы найти страницу.</p>
+  <ul id="search-results" aria-label="Результаты поиска"></ul>
+  <button type="button" class="text-button" id="search-retry" hidden>Попробовать снова</button>
+  <p class="search-help">Поиск по опубликованным страницам. Учебные материалы ещё готовятся.</p>
+</dialog>
+<script>
+  import { matchesSearchQuery } from '../lib/search-policy';
+  interface SearchData { content?: string; url: string; meta: { title?: string }; excerpt: string; }
+  interface SearchIndex {
+    init: () => Promise<void>;
+    options: (options: { baseUrl: string }) => Promise<void>;
+    search: (query: string) => Promise<{ results: { data: () => Promise<SearchData> }[] }>;
+  }
+  const dialog = document.querySelector<HTMLDialogElement>('#search-dialog')!;
+  const input = document.querySelector<HTMLInputElement>('#search-input')!;
+  const status = document.querySelector<HTMLParagraphElement>('#search-status')!;
+  const results = document.querySelector<HTMLUListElement>('#search-results')!;
+  const retry = document.querySelector<HTMLButtonElement>('#search-retry')!;
+  const trigger = document.querySelector<HTMLButtonElement>('.search-trigger')!;
+  let index: SearchIndex | undefined;
+  let loadingIndex: Promise<SearchIndex> | undefined;
+  let revision = 0;
+  let indexAttempt = 0;
+  let timer: ReturnType<typeof setTimeout>;
+  let returnFocus: HTMLElement | null = null;
+
+  async function loadIndex() {
+    if (index) return index;
+    if (!loadingIndex) {
+      const moduleUrl = new URL(dialog.dataset.indexUrl!, location.href);
+      // Browsers cache failed dynamic imports; retry with a fresh module URL.
+      if (indexAttempt > 0) moduleUrl.searchParams.set('retry', String(indexAttempt));
+      const url = moduleUrl.href;
+      loadingIndex = (async () => {
+        const module: SearchIndex = await import(/* @vite-ignore */ url);
+        await module.options({ baseUrl: import.meta.env.BASE_URL });
+        await module.init();
+        index = module;
+        return module;
+      })().catch((error) => { loadingIndex = undefined; throw error; });
+    }
+    return loadingIndex;
+  }
+
+  async function search() {
+    const request = ++revision;
+    const query = input.value.trim();
+    retry.hidden = true;
+    results.replaceChildren();
+    status.textContent = query ? 'Ищем…' : 'Загрузка поиска…';
+    try {
+      const pagefind = await loadIndex();
+      if (request !== revision) return;
+      if (!query) { status.textContent = 'Введите запрос, чтобы найти страницу.'; return; }
+      const response = await pagefind.search(query);
+      const candidates = await Promise.all(response.results.map((result) => result.data()));
+      const records = candidates.filter((record) => matchesSearchQuery(query, record)).slice(0, 12);
+      if (request !== revision) return;
+      status.textContent = records.length ? `Найдено страниц: ${records.length}` : 'Ничего не найдено. Учебные материалы ещё готовятся.';
+      for (const record of records) {
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = record.url;
+        const title = document.createElement('span');
+        title.className = 'result-title';
+        title.textContent = record.meta.title || 'Страница Mandarin';
+        const excerpt = document.createElement('span');
+        excerpt.className = 'result-excerpt';
+        excerpt.textContent = new DOMParser().parseFromString(record.excerpt, 'text/html').body.textContent;
+        link.append(title, excerpt);
+        item.append(link);
+        results.append(item);
+      }
+    } catch {
+      if (request !== revision) return;
+      status.textContent = 'Не удалось загрузить поиск. Проверьте соединение и попробуйте снова.';
+      retry.hidden = false;
+    }
+  }
+  function openSearch() {
+    if (dialog.open) return;
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : trigger;
+    dialog.showModal();
+    document.documentElement.classList.add('modal-open');
+    input.focus();
+    void search();
+  }
+  trigger.addEventListener('click', openSearch);
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      const menu = document.querySelector<HTMLDialogElement>('#sections-dialog');
+      if (menu?.open) menu.close();
+      openSearch();
+    }
+  });
+  input.addEventListener('input', () => { ++revision; clearTimeout(timer); timer = setTimeout(() => { void search(); }, 180); });
+  retry.addEventListener('click', () => { ++indexAttempt; index = undefined; loadingIndex = undefined; void search(); });
+  dialog.querySelector('[data-close-search]')!.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => { ++revision; document.documentElement.classList.remove('modal-open'); returnFocus?.focus(); });
+  dialog.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { event.preventDefault(); dialog.close(); return; }
+    const links = Array.from(results.querySelectorAll('a'));
+    if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && links.length) {
+      event.preventDefault();
+      const current = links.indexOf(document.activeElement as HTMLAnchorElement);
+      const next = event.key === 'ArrowDown' ? (current + 1) % links.length : (current <= 0 ? links.length - 1 : current - 1);
+      links[next]?.focus();
+    }
+  });
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) { const rect = dialog.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close(); } });
+</script>

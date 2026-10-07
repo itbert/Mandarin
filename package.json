@@ -1,0 +1,34 @@
+{
+  "name": "mandarin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "check": "astro check",
+    "build": "astro build && node -e \"require('node:fs').writeFileSync('dist/.nojekyll', '')\"",
+    "preview": "astro preview --host 127.0.0.1",
+    "test:smoke": "node scripts/smoke.mjs",
+    "browser:install": "playwright install chromium firefox webkit",
+    "browser": "playwright-cli"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.3.0",
+    "@astrojs/starlight": "0.42.5",
+    "@fontsource-variable/inter": "5.3.0",
+    "@orama/stemmers": "3.1.18",
+    "astro": "7.2.10",
+    "katex": "0.19.0",
+    "rehype-katex": "7.0.1",
+    "remark-math": "6.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@playwright/cli": "0.1.22",
+    "parse5": "8.0.1",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,59 @@
+---
+import SectionNav from './SectionNav.astro';
+import Search from './Search.astro';
+import { sections, withBase } from '../config/sections';
+const pathname = Astro.url.pathname;
+const isHome = pathname === withBase('/');
+---
+<div class="header-inner">
+  <a class="brand" href={withBase('/')} aria-label="Mandarin — главная">Mandarin</a>
+  {!isHome && <nav class="top-nav" aria-label="Основная навигация">
+    {sections.map((section) => <a href={withBase(section.path)} aria-current={pathname.startsWith(withBase(section.path)) ? 'page' : undefined}>{section.title}</a>)}
+  </nav>}
+  <div class="header-tools">
+    <nav class="header-links" aria-label="О сайте">
+      <a href={withBase('/about/')}>О проекте</a>
+      <a href={withBase('/license/')}>Лицензия</a>
+    </nav>
+    <Search />
+    <div class="theme-control js-only">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+      <select id="theme-select" aria-label="Цветовая тема" title="Цветовая тема"><option value="system">Системная</option><option value="light">Светлая</option><option value="dark">Тёмная</option></select>
+    </div>
+    <button class="menu-trigger icon-button js-only" type="button" aria-label="Разделы" aria-haspopup="dialog" aria-controls="sections-dialog">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+      <span class="menu-trigger-text">Разделы</span>
+    </button>
+  </div>
+</div>
+<dialog id="sections-dialog" class="menu-dialog" aria-labelledby="sections-dialog-title">
+  <div class="dialog-heading"><h2 id="sections-dialog-title">Разделы</h2><button class="icon-button" type="button" data-close-menu aria-label="Закрыть меню">✕</button></div>
+  <SectionNav />
+</dialog>
+<noscript><div class="nojs-nav"><SectionNav /></div></noscript>
+<script>
+  const siteHeader = document.querySelector<HTMLElement>('.site-header')!;
+  new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--header-height', `${siteHeader.offsetHeight}px`);
+  }).observe(siteHeader);
+  const themeSelect = document.querySelector<HTMLSelectElement>('#theme-select')!;
+  themeSelect.value = document.documentElement.dataset.themePreference || 'system';
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const updateTheme = () => {
+    const preference = themeSelect.value;
+    document.documentElement.dataset.theme = preference === 'system' ? (media.matches ? 'dark' : 'light') : preference;
+    document.documentElement.dataset.themePreference = preference;
+    try { localStorage.setItem('mandarin-theme', preference); } catch {}
+  };
+  themeSelect.addEventListener('change', updateTheme);
+  media.addEventListener('change', () => { if (themeSelect.value === 'system') updateTheme(); });
+
+  const menu = document.querySelector<HTMLDialogElement>('#sections-dialog')!;
+  const trigger = document.querySelector<HTMLButtonElement>('.menu-trigger')!;
+  trigger.addEventListener('click', () => { menu.showModal(); document.documentElement.classList.add('modal-open'); });
+  menu.querySelector('[data-close-menu]')!.addEventListener('click', () => menu.close());
+  menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => menu.close()));
+  menu.addEventListener('click', (event) => { if (event.target === menu) { const rect = menu.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) menu.close(); } });
+  menu.addEventListener('close', () => { document.documentElement.classList.remove('modal-open'); trigger.focus(); });
+  matchMedia('(min-width: 75rem)').addEventListener('change', (event) => { if (event.matches && menu.open) menu.close(); });
+</script>

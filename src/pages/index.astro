@@ -1,0 +1,12 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { sections, withBase } from '../config/sections';
+---
+<StarlightPage frontmatter={{ title: 'Математика понятным языком', description: 'Mandarin — открытый учебник на русском языке: математическая подготовка, математический анализ и линейная алгебра.', template: 'splash', tableOfContents: false }}>
+  <div class="home">
+    <h1 id="_top" class="sr-only" data-pagefind-meta="title">Mandarin — онлайн-учебник по математике</h1>
+    <nav class="direction-picker" aria-label="Выберите направление">
+      {sections.map((section) => <a href={withBase(section.path)} class="direction-button">{section.title}</a>)}
+    </nav>
+  </div>
+</StarlightPage>

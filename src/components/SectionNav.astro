@@ -1,0 +1,46 @@
+---
+import { sections, withBase, currentSection } from '../config/sections';
+import { getSectionNavigation } from '../lib/navigation';
+import NavTree from './NavTree.astro';
+interface Props { includeDirections?: boolean; }
+const { includeDirections = true } = Astro.props;
+const pathname = Astro.url.pathname;
+const current = currentSection(pathname);
+const tree = current ? await getSectionNavigation(current.id) : [];
+const isOverview = current && pathname === withBase(current.path);
+---
+{includeDirections && <nav aria-label="Направления учебника" class="directions-nav">
+  <p class="nav-label">Направления</p>
+  <ul class="nav-tree">
+    {sections.map((section) => <li><a href={withBase(section.path)} aria-current={current?.id === section.id ? 'page' : undefined}>{section.title}</a></li>)}
+  </ul>
+</nav>}
+{current ? <nav aria-label={`Содержание: ${current.title}`} class="book-nav">
+  <p class="book-nav-title">{current.title}</p>
+  <ul class="nav-tree">
+    <li><a href={withBase(current.path)} aria-current={isOverview ? 'page' : undefined} data-page-section={isOverview ? '_top' : undefined}>О направлении</a></li>
+  </ul>
+  {tree.length > 0 ? <NavTree nodes={tree} /> : <ul class="nav-tree page-sections">
+    <li><a href={`${withBase(current.path)}#_materials`} data-page-section={isOverview ? '_materials' : undefined}>Учебные материалы</a></li>
+  </ul>}
+</nav> : !includeDirections && <nav aria-label="Направления учебника" class="directions-nav">
+  <p class="nav-label">Направления</p>
+  <ul class="nav-tree">{sections.map((section) => <li><a href={withBase(section.path)}>{section.title}</a></li>)}</ul>
+</nav>}
+<nav class="nav-secondary" aria-label="О сайте">
+  <a href={withBase('/')}>Главная</a>
+  <a href={withBase('/about/')} aria-current={pathname === withBase('/about/') ? 'page' : undefined}>О проекте</a>
+  <a href={withBase('/license/')} aria-current={pathname === withBase('/license/') ? 'page' : undefined}>Лицензия</a>
+</nav>
+<script>
+  const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-page-section]'));
+  function updateCurrent() {
+    const current = location.hash.slice(1) || '_top';
+    anchors.forEach((anchor) => {
+      if (anchor.dataset.pageSection === current) anchor.setAttribute('aria-current', current === '_top' ? 'page' : 'location');
+      else anchor.removeAttribute('aria-current');
+    });
+  }
+  updateCurrent();
+  window.addEventListener('hashchange', updateCurrent);
+</script>

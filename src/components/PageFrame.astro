@@ -1,0 +1,15 @@
+---
+import SectionNav from './SectionNav.astro';
+import SiteFooter from './SiteFooter.astro';
+import { withBase } from '../config/sections';
+const { hasSidebar } = Astro.locals.starlightRoute;
+const isHome = Astro.url.pathname === withBase('/');
+---
+<div class:list={['site-frame', { 'is-home': isHome }]}>
+  <header class="site-header" data-pagefind-ignore><slot name="header" /></header>
+  <div class:list={['site-layout', { 'with-sidebar': hasSidebar, 'landing-layout': isHome }]}>
+    {hasSidebar && <aside class="desktop-sidebar" data-pagefind-ignore><SectionNav includeDirections={false} /></aside>}
+    <div class="reading-column"><slot /></div>
+  </div>
+  <SiteFooter />
+</div>

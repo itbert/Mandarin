@@ -1,0 +1,21 @@
+---
+interface Props { kind: string; }
+const { kind } = Astro.props;
+---
+<svg class="section-symbol" width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  {kind === 'geometry' && <>
+    <path d="m10 50 21-38 23 38H10Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+    <path d="M31 12v38M10 50l33-20" stroke="currentColor" stroke-width="1.2" opacity=".45" />
+    <circle cx="31" cy="12" r="3" fill="currentColor" /><circle cx="10" cy="50" r="3" fill="currentColor" /><circle cx="54" cy="50" r="3" fill="currentColor" />
+  </>}
+  {kind === 'curve' && <>
+    <path d="M10 13v39h45" stroke="currentColor" stroke-width="1.3" opacity=".45" />
+    <path d="M13 43c9 0 6-24 18-24s9 27 24 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    <path d="M31 19v33" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 4" opacity=".45" /><circle cx="31" cy="19" r="3" fill="currentColor" />
+  </>}
+  {kind === 'vectors' && <>
+    <path d="M15 49h40M15 49V9" stroke="currentColor" stroke-width="1.3" opacity=".45" />
+    <path d="m15 49 27-29m-8 1 8-1-1 8M15 49l36-13m-7-3 7 3-3 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="15" cy="49" r="3" fill="currentColor" />
+  </>}
+</svg>

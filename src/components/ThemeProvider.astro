@@ -1,0 +1,12 @@
+<script is:inline>
+  document.documentElement.classList.add('js');
+  (() => {
+    let preference = 'system';
+    try { preference = localStorage.getItem('mandarin-theme') || 'system'; } catch {}
+    if (!['light', 'dark', 'system'].includes(preference)) preference = 'system';
+    document.documentElement.dataset.theme = preference === 'system'
+      ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : preference;
+    document.documentElement.dataset.themePreference = preference;
+  })();
+</script>
