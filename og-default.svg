@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#faf9f6"/>
+  <g transform="translate(72 68) scale(2)" fill="#b74612"><path d="M16 7C9.5 4 3 8.5 3 17.5 3 25 8.5 29 16 29s13-4 13-11.5C29 8.5 22.5 4 16 7Z"/><path d="M16 7c0-4 3-6 7-5-1 4-3 6-7 5Z"/><path d="M10 16v6m6-9v9m6-6v6" stroke="#faf9f6" stroke-width="2" stroke-linecap="round"/></g>
+  <g font-family="Arial, sans-serif" fill="#262724">
+    <text x="156" y="112" font-size="44" font-weight="600">Mandarin</text>
+    <text x="72" y="276" font-size="72" font-weight="600">Математика</text>
+    <text x="72" y="362" font-size="72" font-weight="600" fill="#b74612">понятным языком</text>
+    <text x="72" y="432" font-size="27" fill="#64645e">Открытая библиотека на русском языке</text>
+    <path d="M72 494h1056" stroke="#ddded7"/>
+    <g font-size="23" fill="#64645e"><text x="72" y="550">Математическая подготовка</text><text x="488" y="550">Математический анализ</text><text x="878" y="550">Линейная алгебра</text></g>
+  </g>
+</svg>
