@@ -18,7 +18,7 @@ const toc = entry.data.lesson ? headings.filter((heading) => heading.depth === 2
 <script>
   const tocDetails = document.querySelector<HTMLDetailsElement>('.lesson-toc details');
   if (tocDetails) {
-    const desktop = matchMedia('(min-width: 80rem)');
+    const desktop = matchMedia('(min-width: 100rem)');
     const update = () => { tocDetails.open = desktop.matches; };
     update();
     desktop.addEventListener('change', update);
