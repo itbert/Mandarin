@@ -26,7 +26,8 @@
   --space-4: 1rem; --space-5: 1.5rem; --space-6: 2rem;
   --space-7: 3rem; --space-8: 4rem;
   --radius: .25rem;
-  --content-width: 48rem;
+  --content-width: 56rem;
+  --toc-width: 13rem;
   --site-width: 100%;
   --header-height: 4rem;
   --sidebar-width: 18rem;
@@ -115,7 +116,7 @@ html:not(.js) .js-only { display: none; }
 .nav-secondary { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border); display: grid; }
 .nav-secondary a { color: var(--color-muted); min-height: 44px; display: flex; align-items: center; padding: var(--space-2) var(--space-3); font-size: .875rem; text-decoration: none; }
 .nav-secondary a:hover, .nav-secondary a[aria-current] { color: var(--color-accent); text-decoration: underline; }
-.reading-column { min-width: 0; width: 100%; padding: var(--space-6) clamp(var(--space-6), 3vw, var(--space-8)) var(--space-8); }
+.reading-column { min-width: 0; width: 100%; max-width: calc(var(--content-width) + 2 * var(--space-8)); margin-inline: auto; padding: var(--space-6) clamp(var(--space-6), 3vw, var(--space-8)) var(--space-8); }
 .page-intro { margin-bottom: var(--space-5); }
 .breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-bottom: var(--space-6); font-size: .8125rem; line-height: 1.5; color: var(--color-muted); }
 .breadcrumbs a { min-width: 44px; justify-content: center; min-height: 44px; display: inline-flex; align-items: center; color: var(--color-muted); text-decoration: none; }
@@ -176,7 +177,8 @@ html:not(.js) .js-only { display: none; }
 .course-articles p { font-size: .9375rem; line-height: 1.6; color: var(--color-muted); margin-top: var(--space-1); }
 .advanced-label { display: inline-block; margin-inline-start: var(--space-2); font-size: .75rem; color: var(--color-muted); border: 1px solid var(--color-border); padding-inline: var(--space-2); border-radius: var(--radius); }
 @media (min-width: 80rem) {
-  .has-lesson-toc { display: grid; grid-template-columns: minmax(0, 1fr) 13rem; gap: var(--space-7); align-items: start; }
+  .reading-column.is-lesson { max-width: calc(var(--content-width) + var(--toc-width) + var(--space-7) + 2 * var(--space-8)); }
+  .has-lesson-toc { display: grid; grid-template-columns: minmax(0, 1fr) var(--toc-width); gap: var(--space-7); align-items: start; }
   .lesson-toc { order: 0; position: sticky; top: calc(var(--header-height) + var(--space-5)); max-height: calc(100svh - var(--header-height) - var(--space-7)); overflow-y: auto; }
 }
 .material-status { padding-block: var(--space-6); margin-top: var(--space-6); border-block: 1px solid var(--color-border); }
