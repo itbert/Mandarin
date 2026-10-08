@@ -272,6 +272,9 @@ if (await existingFile(pagefindJS)) {
         ['прообраз', 'analysis/language/functions/'],
         ['биекция', 'analysis/language/inverses/'],
         ['фактор-множество', 'analysis/language/relations/'],
+        ['упорядоченное поле', 'analysis/real-numbers/ordered-field/'],
+        ['частичный порядок', 'analysis/real-numbers/order/'],
+        ['супремум', 'analysis/real-numbers/supremum/'],
       ];
       for (const [query, expected] of queries) {
         const search = await pagefind.search(query);

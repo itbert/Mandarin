@@ -6,9 +6,11 @@ description: "Открытый учебник математического а�
 import { withBase } from '../../../config/sections';
 import { getCollection } from 'astro:content';
 
-export const languageLessons = (await getCollection('docs', (page) =>
-  page.data.lesson && !page.data.draft && page.id.startsWith('analysis/language/')
+export const lessons = (await getCollection('docs', (page) =>
+  page.data.lesson && !page.data.draft && page.id.startsWith('analysis/')
 )).sort((a, b) => (a.data.sidebar.order ?? 0) - (b.data.sidebar.order ?? 0));
+
+export const publishedChapters = [...new Set(lessons.flatMap((page) => page.data.chapters ?? []))];
 
 Этот учебник начинается с языка математики и постепенно переходит к вещественным числам, пределам и непрерывности. Для начала достаточно школьной алгебры: смысл новых обозначений и устройство доказательств разбираются по ходу чтения.
 
@@ -20,11 +22,9 @@ export const languageLessons = (await getCollection('docs', (page) =>
 
 Слева находятся главы и опубликованные статьи. Внутри статьи — оглавление по вопросам; внизу — переход к следующему материалу. Уже знакомую тему можно пропустить и вернуться к ней по ссылкам из следующих статей.
 
-## Первая глава: язык математики
+## Опубликованные главы
 
-<ol>
-  {languageLessons.map((page) => <li><a href={withBase('/' + page.id + '/')}>{page.data.title}</a></li>)}
-</ol>
+{publishedChapters.map((chapter) => <section><h3>{chapter}</h3><ol>{lessons.filter((page) => page.data.chapters?.includes(chapter)).map((page) => <li><a href={withBase('/' + page.id + '/')}>{page.data.title}</a></li>)}</ol></section>)}
 
 ## Дальнейший маршрут
 
