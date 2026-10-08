@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import { analysisCourse, courseRoute } from '../config/analysis-course';
+import { requiredTopicGroups, requiredTopics, reviewedTopicIds } from '../config/analysis-required-topics';
+import { withBase } from '../config/sections';
+const pages = await getCollection('docs', (page) => page.data.lesson && !page.data.draft);
+const published = new Set(pages.map((page) => `/${page.id}/`));
+const reviewed = new Set(reviewedTopicIds);
+const articles = analysisCourse.flatMap((chapter) => chapter.articles.map((article) => ({
+  ...article, route: courseRoute(chapter, article),
+})));
+const materials = (id: number) => articles.filter((article) => article.topics.includes(id) && published.has(article.route));
+---
+<div class="course-plan required-topics">
+  <p class="course-plan-status">{requiredTopics.length} обязательные темы · раскрыто в проверенных статьях: {reviewed.size}</p>
+  <p class="course-plan-legend">«Раскрыто» означает проверку содержания, а не только наличие страницы. «Частично» — часть вопроса уже доступна. «Впереди» — соответствующий материал ещё не опубликован. Это состояние учебника, а не отметки о ваших знаниях.</p>
+  {requiredTopicGroups.map((group, groupIndex) => <details class="course-chapter" open={groupIndex === 0}>
+    <summary><span class="chapter-number">{groupIndex + 1}</span><span>{group.title}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.5" /></svg></summary>
+    <ol class="course-articles" start={group.start}>
+      {group.titles.map((title, offset) => {
+        const id = group.start + offset;
+        const available = materials(id);
+        return <li data-required-topic={id} data-topic-status={reviewed.has(id) ? 'reviewed' : available.length ? 'partial' : 'planned'}>
+          <span class="article-number">{id}</span>
+          <div>
+            <span class="planned-title">{title}</span>
+            <p data-pagefind-ignore>{reviewed.has(id) ? 'Раскрыто' : available.length ? 'Частично' : 'Впереди'}{available.map((article) => <span> · <a href={withBase(article.route)}>{article.title}</a></span>)}</p>
+          </div>
+        </li>;
+      })}
+    </ol>
+  </details>)}
+</div>

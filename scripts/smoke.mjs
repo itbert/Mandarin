@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { parse } from 'parse5';
 import { matchesSearchQuery } from '../src/lib/search-policy.ts';
 import { analysisCourse, courseRoute, plannedArticleCount } from '../src/config/analysis-course.ts';
+import { requiredTopics, reviewedTopicIds } from '../src/config/analysis-required-topics.ts';
 
 const dist = path.resolve(process.argv[2] || 'dist');
 const origin = 'https://itbert.github.io';
@@ -50,6 +51,14 @@ const coveredTopics = new Set(plannedArticles.flatMap((article) => article.topic
 assert(Array.from({ length: 62 }, (_, i) => i + 1).every((topic) => coveredTopics.has(topic)), 'Course plan loses an original topic');
 assert([...coveredTopics].every((topic) => topic >= 1 && topic <= 62), 'Course plan references an unknown original topic');
 assert(new Set(plannedArticles.map((article) => article.route)).size === plannedArticleCount, 'Course plan contains duplicate article routes');
+assert(requiredTopics.length === 62 && new Set(requiredTopics.map((topic) => topic.id)).size === 62, 'Required list must contain exactly 62 unique topics');
+assert(requiredTopics.every((topic, index) => topic.id === index + 1 && topic.title.trim()), 'Required list must preserve original numbering and nonempty titles');
+assert(new Set(reviewedTopicIds).size === reviewedTopicIds.length, 'Topic audit contains duplicate IDs');
+for (const id of reviewedTopicIds) {
+  assert(coveredTopics.has(id), `Reviewed topic ${id} is absent from the course plan`);
+  const related = plannedArticles.filter((article) => article.topics.includes(id));
+  assert(related.every((article) => lessonRoutes.includes(`${article.route.slice(1)}index.html`)), `Reviewed topic ${id} refers to unpublished lessons`);
+}
 
 function elements(node) {
   const result = [];
@@ -275,6 +284,10 @@ if (await existingFile(pagefindJS)) {
         ['упорядоченное поле', 'analysis/real-numbers/ordered-field/'],
         ['частичный порядок', 'analysis/real-numbers/order/'],
         ['супремум', 'analysis/real-numbers/supremum/'],
+        ['Бернулли', 'analysis/real-numbers/induction/'],
+        ['существование корней', 'analysis/real-numbers/completeness/'],
+        ['Архимедово свойство', 'analysis/real-numbers/archimedes/'],
+        ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
         const search = await pagefind.search(query);
@@ -323,6 +336,24 @@ if (coursePlan) {
     const routeFile = article.route.slice(1) + 'index.html';
     const links = coursePlan.nodes.filter((node) => node.tagName === 'a' && attr(node, 'href') === href);
     assert(expectedFiles.includes(routeFile) ? links.length > 0 : links.length === 0, 'Course plan must link only to a published article: ' + article.route);
+  }
+}
+
+const requiredList = documents.get('analysis/required-topics/index.html');
+assert(requiredList, 'Missing separate required-topics page');
+if (requiredList) {
+  const rows = requiredList.nodes.filter((node) => hasAttr(node, 'data-required-topic'));
+  assert(rows.length === requiredTopics.length, 'Rendered required list loses or duplicates a topic');
+  for (const topic of requiredTopics) {
+    const row = rows.find((node) => attr(node, 'data-required-topic') === String(topic.id));
+    assert(row && normalizedText(row).includes(topic.title), `Required topic ${topic.id} is missing its original label`);
+    if (!row) continue;
+    const related = plannedArticles.filter((article) => article.topics.includes(topic.id) && lessonRoutes.includes(`${article.route.slice(1)}index.html`));
+    const expectedStatus = reviewedTopicIds.includes(topic.id) ? 'reviewed' : related.length ? 'partial' : 'planned';
+    assert(attr(row, 'data-topic-status') === expectedStatus, `Topic ${topic.id}: incorrect coverage status`);
+    for (const article of related) {
+      assert(elements(row).some((node) => node.tagName === 'a' && attr(node, 'href') === base + article.route.slice(1)), `Topic ${topic.id}: missing published article link`);
+    }
   }
 }
 
