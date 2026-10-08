@@ -176,9 +176,16 @@ html:not(.js) .js-only { display: none; }
 .course-articles a { display: inline-flex; align-items: center; min-height: 44px; }
 .course-articles p { font-size: .9375rem; line-height: 1.6; color: var(--color-muted); margin-top: var(--space-1); }
 .advanced-label { display: inline-block; margin-inline-start: var(--space-2); font-size: .75rem; color: var(--color-muted); border: 1px solid var(--color-border); padding-inline: var(--space-2); border-radius: var(--radius); }
+@media (min-width: 56.25rem) {
+  .site-layout:not(.landing-layout) .reading-column {
+    --article-offset: clamp(0px, calc((100vw - var(--sidebar-width) - var(--content-width) - 2 * var(--reader-gutter)) / 2), var(--space-8));
+    position: relative;
+    inset-inline-start: calc(-1 * var(--article-offset));
+  }
+}
 @media (min-width: 100rem) {
-  .reading-column.is-lesson { --article-offset: var(--space-8); max-width: calc(var(--content-width) + 2 * (var(--toc-width) + var(--space-7) + var(--reader-gutter))); }
-  .is-lesson .page-intro { margin-inline: calc(var(--toc-width) + var(--space-7) - var(--article-offset)) calc(var(--toc-width) + var(--space-7) + var(--article-offset)); }
+  .site-layout .reading-column.is-lesson:has(.has-lesson-toc) { --article-offset: var(--space-8); inset-inline-start: 0; max-width: calc(var(--content-width) + 2 * (var(--toc-width) + var(--space-7) + var(--reader-gutter))); }
+  .is-lesson:has(.has-lesson-toc) .page-intro { margin-inline: calc(var(--toc-width) + var(--space-7) - var(--article-offset)) calc(var(--toc-width) + var(--space-7) + var(--article-offset)); }
   .has-lesson-toc { display: grid; grid-template-columns: calc(var(--toc-width) - var(--article-offset)) minmax(0, 1fr) calc(var(--toc-width) + var(--article-offset)); gap: var(--space-7); align-items: start; }
   .has-lesson-toc .lesson-body { grid-column: 2; }
   .has-lesson-toc .lesson-toc { grid-column: 3; width: var(--toc-width); }
