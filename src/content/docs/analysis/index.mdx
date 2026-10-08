@@ -4,6 +4,11 @@ description: "Открытый учебник математического а�
 ---
 
 import { withBase } from '../../../config/sections';
+import { getCollection } from 'astro:content';
+
+export const languageLessons = (await getCollection('docs', (page) =>
+  page.data.lesson && !page.data.draft && page.id.startsWith('analysis/language/')
+)).sort((a, b) => (a.data.sidebar.order ?? 0) - (b.data.sidebar.order ?? 0));
 
 Этот учебник начинается с языка математики и постепенно переходит к вещественным числам, пределам и непрерывности. Для начала достаточно школьной алгебры: смысл новых обозначений и устройство доказательств разбираются по ходу чтения.
 
@@ -15,12 +20,10 @@ import { withBase } from '../../../config/sections';
 
 Слева находятся главы и опубликованные статьи. Внутри статьи — оглавление по вопросам; внизу — переход к следующему материалу. Уже знакомую тему можно пропустить и вернуться к ней по ссылкам из следующих статей.
 
-## Первые статьи
+## Первая глава: язык математики
 
 <ol>
-  <li><a href={withBase('/analysis/language/sets/')}>Множества и операции</a> — научиться читать принадлежность, включение и действия над множествами.</li>
-  <li><a href={withBase('/analysis/language/logic/')}>Высказывания, кванторы и доказательства</a> — понять, что именно нужно доказать и как отрицать утверждение.</li>
-  <li><a href={withBase('/analysis/language/families/')}>Семейства множеств и законы де Моргана</a> — перейти от двух множеств к целому семейству.</li>
+  {languageLessons.map((page) => <li><a href={withBase('/' + page.id + '/')}>{page.data.title}</a></li>)}
 </ol>
 
 ## Дальнейший маршрут

@@ -269,6 +269,9 @@ if (await existingFile(pagefindJS)) {
         ['подготовка математическая', 'preparation/'],
         ['кванторы', 'analysis/language/logic/'],
         ['Моргана', 'analysis/language/families/'],
+        ['прообраз', 'analysis/language/functions/'],
+        ['биекция', 'analysis/language/inverses/'],
+        ['фактор-множество', 'analysis/language/relations/'],
       ];
       for (const [query, expected] of queries) {
         const search = await pagefind.search(query);
