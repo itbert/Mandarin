@@ -177,11 +177,11 @@ html:not(.js) .js-only { display: none; }
 .course-articles p { font-size: .9375rem; line-height: 1.6; color: var(--color-muted); margin-top: var(--space-1); }
 .advanced-label { display: inline-block; margin-inline-start: var(--space-2); font-size: .75rem; color: var(--color-muted); border: 1px solid var(--color-border); padding-inline: var(--space-2); border-radius: var(--radius); }
 @media (min-width: 100rem) {
-  .reading-column.is-lesson { max-width: calc(var(--content-width) + 2 * (var(--toc-width) + var(--space-7) + var(--reader-gutter))); }
-  .is-lesson .page-intro { margin-inline: calc(var(--toc-width) + var(--space-7)); }
-  .has-lesson-toc { display: grid; grid-template-columns: var(--toc-width) minmax(0, 1fr) var(--toc-width); gap: var(--space-7); align-items: start; }
+  .reading-column.is-lesson { --article-offset: var(--space-8); max-width: calc(var(--content-width) + 2 * (var(--toc-width) + var(--space-7) + var(--reader-gutter))); }
+  .is-lesson .page-intro { margin-inline: calc(var(--toc-width) + var(--space-7) - var(--article-offset)) calc(var(--toc-width) + var(--space-7) + var(--article-offset)); }
+  .has-lesson-toc { display: grid; grid-template-columns: calc(var(--toc-width) - var(--article-offset)) minmax(0, 1fr) calc(var(--toc-width) + var(--article-offset)); gap: var(--space-7); align-items: start; }
   .has-lesson-toc .lesson-body { grid-column: 2; }
-  .has-lesson-toc .lesson-toc { grid-column: 3; }
+  .has-lesson-toc .lesson-toc { grid-column: 3; width: var(--toc-width); }
   .lesson-toc { order: 0; position: sticky; top: calc(var(--header-height) + var(--space-5)); max-height: calc(100svh - var(--header-height) - var(--space-7)); overflow-y: auto; }
 }
 .material-status { padding-block: var(--space-6); margin-top: var(--space-6); border-block: 1px solid var(--color-border); }
