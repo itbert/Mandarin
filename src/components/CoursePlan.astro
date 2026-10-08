@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import { analysisCourse, courseRoute, plannedArticleCount } from '../config/analysis-course';
+import { withBase } from '../config/sections';
+const pages = await getCollection('docs', (page) => !page.data.draft);
+const published = new Set(pages.map((page) => `/${page.id.replace(/\/index$/, '')}/`));
+const available = analysisCourse.flatMap((chapter) => chapter.articles.filter((article) => published.has(courseRoute(chapter, article))));
+---
+<div class="course-plan">
+  <p class="course-plan-status">{analysisCourse.length} глав · {plannedArticleCount} статей в плане · {available.length} опубликованы</p>
+  <p class="course-plan-legend">Ссылки ведут на готовые статьи. Остальные названия обозначают план подготовки; он может уточняться по мере работы над учебником.</p>
+  {analysisCourse.map((chapter, chapterIndex) => <details class="course-chapter" open={chapterIndex === 0}>
+    <summary><span class="chapter-number">{chapterIndex + 1}</span><span>{chapter.title}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.5" /></svg></summary>
+    <div class="chapter-description">{chapter.purpose}</div>
+    <ol class="course-articles">
+      {chapter.articles.map((article, articleIndex) => <li>
+        <span class="article-number" aria-hidden="true">{chapterIndex + 1}.{articleIndex + 1}</span>
+        <div>
+          {published.has(courseRoute(chapter, article)) ? <a href={withBase(courseRoute(chapter, article))}>{article.title}</a> : <span class="planned-title">{article.title}</span>}
+          {article.advanced && <span class="advanced-label">Углубление</span>}
+          <p>{article.focus}</p>
+        </div>
+      </li>)}
+    </ol>
+  </details>)}
+</div>

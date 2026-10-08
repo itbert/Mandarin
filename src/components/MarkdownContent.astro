@@ -1,5 +1,26 @@
 ---
 import DirectionState from './DirectionState.astro';
+import LessonNavigation from './LessonNavigation.astro';
+import 'katex/dist/katex.min.css';
+const { entry, headings } = Astro.locals.starlightRoute;
+const toc = entry.data.lesson ? headings.filter((heading) => heading.depth === 2) : [];
 ---
-<div class="sl-markdown-content"><slot /></div>
+<div class:list={['lesson-layout', { 'has-lesson-toc': toc.length > 0 }]}>
+  <div class="lesson-body">
+    <div class="sl-markdown-content"><slot /></div>
+    <LessonNavigation />
+  </div>
+  {toc.length > 0 && <nav class="lesson-toc" aria-label="В этой статье" data-pagefind-ignore>
+    <details><summary>В этой статье</summary><ul>{toc.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul></details>
+  </nav>}
+</div>
 <DirectionState />
+<script>
+  const tocDetails = document.querySelector<HTMLDetailsElement>('.lesson-toc details');
+  if (tocDetails) {
+    const desktop = matchMedia('(min-width: 80rem)');
+    const update = () => { tocDetails.open = desktop.matches; };
+    update();
+    desktop.addEventListener('change', update);
+  }
+</script>

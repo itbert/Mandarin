@@ -6,6 +6,6 @@ import { docsSchema } from '@astrojs/starlight/schema';
 export const collections = {
   docs: defineCollection({
     loader: docsLoader(),
-    schema: docsSchema({ extend: z.object({ chapters: z.array(z.string()).optional() }) }),
+    schema: docsSchema({ extend: z.object({ chapters: z.array(z.string()).optional(), lesson: z.boolean().default(false) }) }),
   }),
 };

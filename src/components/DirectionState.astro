@@ -1,13 +1,15 @@
 ---
 import { sections, currentSection, withBase } from '../config/sections';
+import { getSectionNavigation } from '../lib/navigation';
 const current = currentSection(Astro.url.pathname);
 const isOverview = current && Astro.url.pathname === withBase(current.path);
+const hasMaterials = current ? (await getSectionNavigation(current.id)).length > 0 : false;
 ---
 {isOverview && <>
-  <section class="material-status" aria-labelledby="_materials" data-pagefind-ignore>
+  {!hasMaterials && <section class="material-status" aria-labelledby="_materials" data-pagefind-ignore>
     <h2 id="_materials">Материалы появятся позже</h2>
     <p>Этот раздел готовится. Учебные материалы будут добавлены после запуска сайта.</p>
-  </section>
+  </section>}
   <nav class="other-sections" aria-label="Другие направления" data-pagefind-ignore>
     <h2>Другие направления</h2>
     <ul>{sections.filter((section) => section.id !== current.id).map((section) => <li><a href={withBase(section.path)}>{section.title}</a></li>)}</ul>

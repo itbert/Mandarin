@@ -18,7 +18,7 @@ const isOverview = current && pathname === withBase(current.path);
 {current ? <nav aria-label={`Содержание: ${current.title}`} class="book-nav">
   <p class="book-nav-title">{current.title}</p>
   <ul class="nav-tree">
-    <li><a href={withBase(current.path)} aria-current={isOverview ? 'page' : undefined} data-page-section={isOverview ? '_top' : undefined}>О направлении</a></li>
+    <li><a href={withBase(current.path)} aria-current={isOverview ? 'page' : undefined} data-page-section={isOverview ? '_top' : undefined}>{current.id === 'analysis' && tree.length > 0 ? 'Об учебнике' : 'О направлении'}</a></li>
   </ul>
   {tree.length > 0 ? <NavTree nodes={tree} /> : <ul class="nav-tree page-sections">
     <li><a href={`${withBase(current.path)}#_materials`} data-page-section={isOverview ? '_materials' : undefined}>Учебные материалы</a></li>

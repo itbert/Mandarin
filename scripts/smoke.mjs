@@ -3,11 +3,12 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parse } from 'parse5';
 import { matchesSearchQuery } from '../src/lib/search-policy.ts';
+import { analysisCourse, courseRoute, plannedArticleCount } from '../src/config/analysis-course.ts';
 
 const dist = path.resolve(process.argv[2] || 'dist');
 const origin = 'https://itbert.github.io';
 const base = '/Mandarin/';
-const expectedFiles = [
+const requiredFiles = [
   'index.html', 'preparation/index.html', 'analysis/index.html',
   'linear-algebra/index.html', 'about/index.html', 'license/index.html', '404.html',
 ];
@@ -24,6 +25,31 @@ async function walk(directory) {
   }));
   return nested.flat();
 }
+
+// Derive file-based routes from the real content, including future articles.
+const contentRoot = path.resolve('src/content/docs');
+const contentFiles = (await walk(contentRoot)).filter((file) => /\.mdx?$/.test(file));
+const contentRoutes = [];
+const lessonRoutes = [];
+for (const file of contentFiles) {
+  const source = await readFile(file, 'utf8');
+  const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] || '';
+  if (/^draft:\s*true(?:\s*#.*)?$/m.test(frontmatter)) continue;
+  const relative = path.relative(contentRoot, file).split(path.sep).join('/');
+  let slug = relative.replace(/\.mdx?$/, '').replace(/\/index$/, '');
+  const override = frontmatter.match(/^slug:\s*([^\r\n#]+)(?:#.*)?$/m)?.[1]?.trim();
+  if (override) slug = override.replace(/^['"]|['"]$/g, '').replace(/^\/|\/$/g, '');
+  const route = slug + '/index.html';
+  contentRoutes.push(route);
+  if (/^lesson:\s*true(?:\s*#.*)?$/m.test(frontmatter)) lessonRoutes.push(route);
+}
+const expectedFiles = [...new Set([...requiredFiles, ...contentRoutes])];
+const publicPageCount = expectedFiles.filter((file) => file !== '404.html').length;
+const plannedArticles = analysisCourse.flatMap((chapter) => chapter.articles.map((article) => ({ ...article, route: courseRoute(chapter, article) })));
+const coveredTopics = new Set(plannedArticles.flatMap((article) => article.topics));
+assert(Array.from({ length: 62 }, (_, i) => i + 1).every((topic) => coveredTopics.has(topic)), 'Course plan loses an original topic');
+assert([...coveredTopics].every((topic) => topic >= 1 && topic <= 62), 'Course plan references an unknown original topic');
+assert(new Set(plannedArticles.map((article) => article.route)).size === plannedArticleCount, 'Course plan contains duplicate article routes');
 
 function elements(node) {
   const result = [];
@@ -98,7 +124,7 @@ try { files = await walk(dist); } catch {
 }
 const relativeFiles = files.map((file) => path.relative(dist, file).split(path.sep).join('/'));
 const htmlFiles = relativeFiles.filter((file) => file.endsWith('.html') && !file.startsWith('pagefind/'));
-assert(JSON.stringify([...htmlFiles].sort()) === JSON.stringify([...expectedFiles].sort()), `Expected seven public HTML pages; found: ${htmlFiles.join(', ')}`);
+assert(JSON.stringify([...htmlFiles].sort()) === JSON.stringify([...expectedFiles].sort()), `HTML routes differ from real content: ${htmlFiles.join(', ')}`);
 assert(relativeFiles.includes('.nojekyll'), 'Missing dist/.nojekyll for branch-based GitHub Pages');
 assert(!relativeFiles.some((file) => /(^|\/)(__fixtures__|fixtures|test-fixtures)(\/|\.)/i.test(file)), 'Technical fixtures leaked into production output');
 
@@ -125,7 +151,7 @@ for (const [file, { nodes, ids }] of documents) {
   assert(h1.length === 1 && normalizedText(h1[0]), `${file}: expected one nonempty H1`);
   const headingLevels = nodes.filter((node) => /^h[1-6]$/.test(node.tagName)).map((node) => Number(node.tagName[1]));
   for (let i = 1; i < headingLevels.length; i++) assert(headingLevels[i] <= headingLevels[i - 1] + 1, `${file}: heading level skips from H${headingLevels[i - 1]} to H${headingLevels[i]}`);
-  const titleNodes = ofTag('title');
+  const titleNodes = ofTag('title').filter((node) => node.parentNode?.tagName === 'head');
   const title = titleNodes[0] && normalizedText(titleNodes[0]);
   assert(titleNodes.length === 1 && title, `${file}: expected one nonempty title`);
   assert(!titles.has(title), `${file}: duplicate title ${title}`);
@@ -193,7 +219,7 @@ for (const file of sitemapFiles) {
   }
 }
 const expectedSitemap = expectedFiles.filter((file) => file !== '404.html').map(publicURL);
-assert(JSON.stringify([...sitemapPages].sort()) === JSON.stringify(expectedSitemap.sort()), `Sitemap must contain exactly the six public pages; found ${[...sitemapPages].join(', ')}`);
+assert(JSON.stringify([...sitemapPages].sort()) === JSON.stringify(expectedSitemap.sort()), `Sitemap differs from the published pages; found ${[...sitemapPages].join(', ')}`);
 
 const entryFile = path.join(dist, 'pagefind/pagefind-entry.json');
 assert(await existingFile(entryFile), 'Missing Pagefind entry metadata');
@@ -201,7 +227,7 @@ if (await existingFile(entryFile)) {
   const entry = JSON.parse(await readFile(entryFile, 'utf8'));
   assert(entry.languages?.ru, 'Pagefind must have a Russian index');
   assert(Object.keys(entry.languages || {}).length === 1, 'Unexpected search index language');
-  assert(entry.languages?.ru?.page_count === 6, `Pagefind must index six pages, found ${entry.languages?.ru?.page_count}`);
+  assert(entry.languages?.ru?.page_count === publicPageCount, `Pagefind must index ${publicPageCount} pages, found ${entry.languages?.ru?.page_count}`);
 }
 
 // Execute the generated Pagefind browser API against its actual on-disk chunks.
@@ -226,7 +252,7 @@ if (await existingFile(pagefindJS)) {
       const records = await Promise.all(all.results.map((result) => result.data()));
       const expectedURLs = new Set(expectedFiles.filter((file) => file !== '404.html').map((file) => new URL(publicURL(file)).pathname));
       const actualURLs = new Set(records.map((record) => new URL(record.url, origin).pathname));
-      assert(JSON.stringify([...actualURLs].sort()) === JSON.stringify([...expectedURLs].sort()), `Pagefind results must contain the six real pages: ${[...actualURLs].join(', ')}`);
+      assert(JSON.stringify([...actualURLs].sort()) === JSON.stringify([...expectedURLs].sort()), `Pagefind results differ from real pages: ${[...actualURLs].join(', ')}`);
       for (const record of records) {
         assert(record.meta?.title, `${record.url}: search result is missing its title`);
         assert(!/материалы появятся позже|этот раздел готовится|перейти к содержимому/i.test(record.content), `${record.url}: search indexes repeated notices or interface text`);
@@ -241,6 +267,8 @@ if (await existingFile(pagefindJS)) {
         ['олимпиадный', 'preparation/'],
         ['алгебры', 'linear-algebra/'],
         ['подготовка математическая', 'preparation/'],
+        ['кванторы', 'analysis/language/logic/'],
+        ['Моргана', 'analysis/language/families/'],
       ];
       for (const [query, expected] of queries) {
         const search = await pagefind.search(query);
@@ -252,7 +280,7 @@ if (await existingFile(pagefindJS)) {
           await checkURL(result.url, `${origin}${base}`, `Search «${query}» result`);
         }
       }
-      for (const query of ['интеграл', 'интеграл анализ', 'несуществующийтерминмандариносмоук']) {
+      for (const query of ['несуществующийтерминмандариносмоук', 'квазикристаллы']) {
         const search = await pagefind.search(query);
         const rawResults = await Promise.all(search.results.map((result) => result.data()));
         const results = rawResults.filter((result) => matchesSearchQuery(query, result));
@@ -272,8 +300,28 @@ if (await existingFile(pagefindJS)) {
   }
 }
 
+// Lesson pages must contain rendered mathematics and a reading route.
+for (const file of lessonRoutes) {
+  const document = documents.get(file);
+  assert(document, 'Missing lesson ' + file);
+  if (!document) continue;
+  assert(document.nodes.some((node) => attr(node, 'class')?.split(' ').includes('katex')), file + ': formulas were not rendered by KaTeX');
+  const body = document.nodes.find((node) => hasAttr(node, 'data-pagefind-body'));
+  assert(!body || !/\$\$/.test(normalizedText(body)), file + ': raw display-math delimiters leaked into the lesson');
+  assert(document.nodes.some((node) => node.tagName === 'nav' && attr(node, 'aria-label') === 'Последовательное чтение'), file + ': missing previous/next navigation');
+}
+const coursePlan = documents.get('analysis/plan/index.html');
+if (coursePlan) {
+  for (const article of plannedArticles) {
+    const href = base + article.route.slice(1);
+    const routeFile = article.route.slice(1) + 'index.html';
+    const links = coursePlan.nodes.filter((node) => node.tagName === 'a' && attr(node, 'href') === href);
+    assert(expectedFiles.includes(routeFile) ? links.length > 0 : links.length === 0, 'Course plan must link only to a published article: ' + article.route);
+  }
+}
+
 if (errors.length) {
   console.error(`Smoke checks failed (${errors.length}):\n${errors.map((error) => `  - ${error}`).join('\n')}`);
   process.exit(1);
 }
-console.log(`Smoke checks passed: ${documents.size} HTML pages, ${linkCount} internal links, ${resourceCount} local resources, six sitemap pages and eleven Pagefind control searches.`);
+console.log(`Smoke checks passed: ${documents.size} HTML pages, ${linkCount} internal links, ${resourceCount} local resources, ${publicPageCount} sitemap pages, Pagefind control searches and complete coverage of 62 course topics.`);

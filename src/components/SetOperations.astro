@@ -1,0 +1,45 @@
+<figure class="lesson-visual" data-set-diagram data-pagefind-ignore>
+  <div class="diagram-controls js-only" role="group" aria-label="Операция над множествами">
+    <button type="button" data-operation="intersection" aria-pressed="true">A ∩ B</button>
+    <button type="button" data-operation="union" aria-pressed="false">A ∪ B</button>
+    <button type="button" data-operation="difference" aria-pressed="false">A ∖ B</button>
+    <button type="button" data-operation="complement" aria-pressed="false">U ∖ A</button>
+  </div>
+  <svg viewBox="0 0 400 220" width="400" height="220" role="img" aria-labelledby="set-diagram-title set-diagram-description">
+    <title id="set-diagram-title">Операции над двумя множествами</title>
+    <desc id="set-diagram-description">Два пересекающихся круга A и B внутри прямоугольника U. Штриховкой отмечены элементы, принадлежащие одновременно A и B.</desc>
+    <defs>
+      <pattern id="set-hatch" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke="var(--color-accent)" stroke-width="1.5" /></pattern>
+      <clipPath id="set-clip-b"><circle cx="240" cy="110" r="70" /></clipPath>
+      <mask id="set-outside-a"><rect width="400" height="220" fill="white" /><circle cx="160" cy="110" r="70" fill="black" /></mask>
+      <mask id="set-outside-b"><rect width="400" height="220" fill="white" /><circle cx="240" cy="110" r="70" fill="black" /></mask>
+    </defs>
+    <rect x="12" y="12" width="376" height="196" rx="4" fill="var(--color-surface)" stroke="var(--color-muted)" />
+    <g data-region="intersection"><circle cx="160" cy="110" r="70" fill="url(#set-hatch)" clip-path="url(#set-clip-b)" /></g>
+    <g data-region="union" style="display:none"><circle cx="160" cy="110" r="70" fill="url(#set-hatch)" /><circle cx="240" cy="110" r="70" fill="url(#set-hatch)" /></g>
+    <g data-region="difference" style="display:none"><circle cx="160" cy="110" r="70" fill="url(#set-hatch)" mask="url(#set-outside-b)" /></g>
+    <g data-region="complement" style="display:none"><rect x="12" y="12" width="376" height="196" fill="url(#set-hatch)" mask="url(#set-outside-a)" /></g>
+    <circle cx="160" cy="110" r="70" fill="none" stroke="var(--color-text)" stroke-width="1.5" />
+    <circle cx="240" cy="110" r="70" fill="none" stroke="var(--color-text)" stroke-width="1.5" />
+    <g fill="var(--color-text)" font-size="18"><text x="28" y="38">U</text><text x="118" y="110">A</text><text x="273" y="110">B</text></g>
+  </svg>
+  <figcaption aria-live="polite">A ∩ B: штриховкой отмечены элементы, принадлежащие обоим множествам.</figcaption>
+</figure>
+<script>
+  const descriptions: Record<string, string> = {
+    intersection: 'A ∩ B: штриховкой отмечены элементы, принадлежащие обоим множествам.',
+    union: 'A ∪ B: штриховкой отмечены элементы, принадлежащие хотя бы одному из множеств.',
+    difference: 'A ∖ B: штриховкой отмечены элементы A, которые не принадлежат B.',
+    complement: 'U ∖ A: штриховкой отмечены элементы выбранного множества U, не принадлежащие A.',
+  };
+  document.querySelectorAll<HTMLElement>('[data-set-diagram]').forEach((diagram) => {
+    const buttons = Array.from(diagram.querySelectorAll<HTMLButtonElement>('[data-operation]'));
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      const operation = button.dataset.operation!;
+      buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      diagram.querySelectorAll<SVGElement>('[data-region]').forEach((region) => { region.style.display = region.dataset.region === operation ? '' : 'none'; });
+      diagram.querySelector('figcaption')!.textContent = descriptions[operation];
+      diagram.querySelector('desc')!.textContent = `Два пересекающихся круга A и B внутри прямоугольника U. ${descriptions[operation]}`;
+    }));
+  });
+</script>
