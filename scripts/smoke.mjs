@@ -287,6 +287,9 @@ if (await existingFile(pagefindJS)) {
         ['Бернулли', 'analysis/real-numbers/induction/'],
         ['существование корней', 'analysis/real-numbers/completeness/'],
         ['Архимедово свойство', 'analysis/real-numbers/archimedes/'],
+        ['сечения Дедекинда', 'analysis/real-numbers/real-model/'],
+        ['проколотая окрестность', 'analysis/sequences/distance/'],
+        ['предел последовательности', 'analysis/sequences/sequence-limit/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
