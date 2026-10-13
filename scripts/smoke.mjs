@@ -292,6 +292,7 @@ if (await existingFile(pagefindJS)) {
         ['предел последовательности', 'analysis/sequences/sequence-limit/'],
         ['арифметика пределов', 'analysis/sequences/limit-algebra/'],
         ['корень из номера', 'analysis/sequences/limit-estimates/'],
+        ['монотонные последовательности', 'analysis/sequences/monotone-sequences/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
