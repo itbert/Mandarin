@@ -85,5 +85,5 @@ export const requiredTopics = requiredTopicGroups.flatMap((group) =>
 /** Content audit, not inferred from the existence of a page or from study progress. */
 export const reviewedTopicIds: readonly number[] = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-  29, 30, 31, 34, 35,
+  29, 30, 31, 32, 33, 34, 35,
 ];
