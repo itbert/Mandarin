@@ -290,6 +290,8 @@ if (await existingFile(pagefindJS)) {
         ['сечения Дедекинда', 'analysis/real-numbers/real-model/'],
         ['проколотая окрестность', 'analysis/sequences/distance/'],
         ['предел последовательности', 'analysis/sequences/sequence-limit/'],
+        ['арифметика пределов', 'analysis/sequences/limit-algebra/'],
+        ['корень из номера', 'analysis/sequences/limit-estimates/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
