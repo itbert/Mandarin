@@ -295,6 +295,7 @@ if (await existingFile(pagefindJS)) {
         ['монотонные последовательности', 'analysis/sequences/monotone-sequences/'],
         ['последовательности Коши', 'analysis/sequences/cauchy-sequences/'],
         ['предельные точки', 'analysis/compactness/closed-sets/'],
+        ['вложенные отрезки', 'analysis/compactness/nested-intervals/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
