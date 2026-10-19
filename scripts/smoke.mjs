@@ -299,6 +299,7 @@ if (await existingFile(pagefindJS)) {
         ['Больцано', 'analysis/compactness/subsequences/'],
         ['хвостовые верхние грани', 'analysis/compactness/partial-limits/'],
         ['открытого покрытия', 'analysis/compactness/finite-covers/'],
+        ['критерий Коши для ряда', 'analysis/series/series-basics/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
