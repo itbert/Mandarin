@@ -300,6 +300,7 @@ if (await existingFile(pagefindJS)) {
         ['хвостовые верхние грани', 'analysis/compactness/partial-limits/'],
         ['открытого покрытия', 'analysis/compactness/finite-covers/'],
         ['критерий Коши для ряда', 'analysis/series/series-basics/'],
+        ['предельное сравнение', 'analysis/series/comparison/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
