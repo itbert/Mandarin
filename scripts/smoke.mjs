@@ -304,6 +304,7 @@ if (await existingFile(pagefindJS)) {
         ['условно сходится', 'analysis/series/absolute-convergence/'],
         ['радикальный признак Коши', 'analysis/series/root-ratio-tests/'],
         ['иррациональность числа e', 'analysis/series/e-series/'],
+        ['критерий Гейне', 'analysis/function-limits/function-limit/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
