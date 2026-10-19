@@ -302,6 +302,7 @@ if (await existingFile(pagefindJS)) {
         ['критерий Коши для ряда', 'analysis/series/series-basics/'],
         ['предельное сравнение', 'analysis/series/comparison/'],
         ['условно сходится', 'analysis/series/absolute-convergence/'],
+        ['радикальный признак Коши', 'analysis/series/root-ratio-tests/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
