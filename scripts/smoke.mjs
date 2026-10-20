@@ -307,6 +307,7 @@ if (await existingFile(pagefindJS)) {
         ['критерий Гейне', 'analysis/function-limits/function-limit/'],
         ['условие предела композиции', 'analysis/function-limits/function-limit-algebra/'],
         ['пределы монотонных функций', 'analysis/function-limits/monotone-functions/'],
+        ['колебание функции', 'analysis/function-limits/oscillation/'],
         ['обязательные темы', 'analysis/required-topics/'],
       ];
       for (const [query, expected] of queries) {
